@@ -37,7 +37,7 @@ const menuItems = [
   },
   {
     title: 'My Portfolio',
-    url: '#',
+    url: '/my-portfolio',
     icon: BarChart3,
   },
   {

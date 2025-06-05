@@ -9,7 +9,7 @@ export const TopBar: React.FC = () => {
   return (
     <header className="h-16 border-b border-summit-light-gray/30 glass-effect px-6 flex items-center justify-between">
       <div className="flex items-center space-x-4">
-        <SidebarTrigger asChild>
+        <SidebarTrigger>
           <Button variant="ghost" size="icon" className="hover:bg-summit-blue/10">
             <Menu className="w-5 h-5" />
           </Button>

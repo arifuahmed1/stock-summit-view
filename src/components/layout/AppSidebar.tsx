@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -26,13 +27,12 @@ import {
 const menuItems = [
   {
     title: 'Dashboard',
-    url: '#',
+    url: '/',
     icon: Home,
-    isActive: true,
   },
   {
     title: 'Live Markets',
-    url: '#',
+    url: '/live-markets',
     icon: Activity,
   },
   {
@@ -63,6 +63,8 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
+  const location = useLocation();
+
   return (
     <Sidebar className="border-r border-summit-light-gray/30">
       <SidebarHeader className="p-6">
@@ -88,13 +90,13 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild 
-                    isActive={item.isActive}
+                    isActive={location.pathname === item.url}
                     className="hover:bg-summit-blue/10 hover:text-summit-blue transition-colors"
                   >
-                    <a href={item.url} className="flex items-center space-x-3">
+                    <Link to={item.url} className="flex items-center space-x-3">
                       <item.icon className="w-5 h-5" />
                       <span className="font-medium">{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

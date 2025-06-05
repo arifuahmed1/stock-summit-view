@@ -47,7 +47,7 @@ const menuItems = [
   },
   {
     title: 'Crypto Tracker',
-    url: '#',
+    url: '/crypto-tracker',
     icon: DollarSign,
   },
   {

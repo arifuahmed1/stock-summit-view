@@ -42,7 +42,7 @@ const menuItems = [
   },
   {
     title: 'Stock Analysis',
-    url: '#',
+    url: '/stock-analysis',
     icon: LineChart,
   },
   {

@@ -10,6 +10,7 @@ import MyPortfolio from "./pages/MyPortfolio";
 import StockAnalysis from "./pages/StockAnalysis";
 import CryptoTracker from "./pages/CryptoTracker";
 import AIPredictions from "./pages/AIPredictions";
+import TrendingNews from "./pages/TrendingNews";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

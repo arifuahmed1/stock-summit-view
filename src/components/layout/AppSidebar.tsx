@@ -56,8 +56,8 @@ const menuItems = [
     icon: Brain,
   },
   {
-    title: 'Trending',
-    url: '#',
+    title: 'Trending News',
+    url: '/trending-news',
     icon: TrendingUp,
   },
 ];

@@ -113,12 +113,13 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   asChild
+                  isActive={location.pathname === '/preferences'}
                   className="hover:bg-summit-blue/10 hover:text-summit-blue transition-colors"
                 >
-                  <a href="#" className="flex items-center space-x-3">
+                  <Link to="/preferences" className="flex items-center space-x-3">
                     <Settings className="w-5 h-5" />
                     <span className="font-medium">Preferences</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -9,7 +8,9 @@ import {
   Settings, 
   Home,
   Activity,
-  LineChart
+  LineChart,
+  User,
+  LogOut
 } from 'lucide-react';
 import {
   Sidebar,
@@ -23,6 +24,12 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from '@/components/ui/sidebar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const menuItems = [
   {
@@ -128,17 +135,31 @@ export function AppSidebar() {
       </SidebarContent>
       
       <SidebarFooter className="p-6">
-        <div className="glass-effect rounded-lg p-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-summit-green to-summit-blue rounded-full flex items-center justify-center">
-              <span className="text-sm font-bold text-white">JD</span>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-white">John Doe</p>
-              <p className="text-xs text-gray-400">Premium Member</p>
-            </div>
-          </div>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="glass-effect rounded-lg p-4 w-full hover:bg-summit-blue/10 transition-colors cursor-pointer">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-summit-green to-summit-blue rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">JD</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">John Doe</p>
+                  <p className="text-xs text-gray-400">Premium Member</p>
+                </div>
+              </div>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56 mb-4 ml-4 bg-background border-border">
+            <DropdownMenuItem className="flex items-center space-x-2 cursor-pointer">
+              <User className="w-4 h-4" />
+              <span>Account</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex items-center space-x-2 cursor-pointer text-red-600 hover:text-red-700">
+              <LogOut className="w-4 h-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarFooter>
     </Sidebar>
   );

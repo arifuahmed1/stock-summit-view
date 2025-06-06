@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Bell, Shield, Eye, Palette, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
 const Preferences = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [notifications, setNotifications] = useState(true);
   const [priceAlerts, setPriceAlerts] = useState(true);
   const [newsAlerts, setNewsAlerts] = useState(false);
@@ -19,16 +19,13 @@ const Preferences = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [language, setLanguage] = useState('en');
   const [currency, setCurrency] = useState('usd');
-
   const handleSave = () => {
     toast({
       title: 'Preferences Saved',
-      description: 'Your settings have been updated successfully.',
+      description: 'Your settings have been updated successfully.'
     });
   };
-
-  return (
-    <DashboardLayout>
+  return <DashboardLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Preferences</h1>
@@ -55,10 +52,7 @@ const Preferences = () => {
                     Receive notifications in your browser
                   </p>
                 </div>
-                <Switch 
-                  checked={notifications} 
-                  onCheckedChange={setNotifications}
-                />
+                <Switch checked={notifications} onCheckedChange={setNotifications} />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
@@ -68,10 +62,7 @@ const Preferences = () => {
                     Get notified when stocks reach target prices
                   </p>
                 </div>
-                <Switch 
-                  checked={priceAlerts} 
-                  onCheckedChange={setPriceAlerts}
-                />
+                <Switch checked={priceAlerts} onCheckedChange={setPriceAlerts} />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
@@ -81,10 +72,7 @@ const Preferences = () => {
                     Receive breaking market news notifications
                   </p>
                 </div>
-                <Switch 
-                  checked={newsAlerts} 
-                  onCheckedChange={setNewsAlerts}
-                />
+                <Switch checked={newsAlerts} onCheckedChange={setNewsAlerts} />
               </div>
             </CardContent>
           </Card>
@@ -108,10 +96,7 @@ const Preferences = () => {
                     Add an extra layer of security to your account
                   </p>
                 </div>
-                <Switch 
-                  checked={twoFactor} 
-                  onCheckedChange={setTwoFactor}
-                />
+                <Switch checked={twoFactor} onCheckedChange={setTwoFactor} />
               </div>
             </CardContent>
           </Card>
@@ -130,15 +115,10 @@ const Preferences = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Dark Mode</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Switch to dark theme
-                  </p>
+                  <Label>Light Mode</Label>
+                  <p className="text-sm text-muted-foreground">Switch to light theme</p>
                 </div>
-                <Switch 
-                  checked={darkMode} 
-                  onCheckedChange={setDarkMode}
-                />
+                <Switch checked={darkMode} onCheckedChange={setDarkMode} />
               </div>
             </CardContent>
           </Card>
@@ -198,8 +178,6 @@ const Preferences = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default Preferences;

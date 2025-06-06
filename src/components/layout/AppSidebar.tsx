@@ -52,7 +52,7 @@ const menuItems = [
   },
   {
     title: 'AI Predictions',
-    url: '#',
+    url: '/ai-predictions',
     icon: Brain,
   },
   {

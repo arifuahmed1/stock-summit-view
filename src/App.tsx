@@ -9,6 +9,7 @@ import LiveMarkets from "./pages/LiveMarkets";
 import MyPortfolio from "./pages/MyPortfolio";
 import StockAnalysis from "./pages/StockAnalysis";
 import CryptoTracker from "./pages/CryptoTracker";
+import AIPredictions from "./pages/AIPredictions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/my-portfolio" element={<MyPortfolio />} />
           <Route path="/stock-analysis" element={<StockAnalysis />} />
           <Route path="/crypto-tracker" element={<CryptoTracker />} />
+          <Route path="/ai-predictions" element={<AIPredictions />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

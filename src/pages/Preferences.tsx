@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -8,24 +8,49 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Bell, Shield, Eye, Palette, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+
 const Preferences = () => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [notifications, setNotifications] = useState(true);
   const [priceAlerts, setPriceAlerts] = useState(true);
   const [newsAlerts, setNewsAlerts] = useState(false);
   const [twoFactor, setTwoFactor] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [lightMode, setLightMode] = useState(false);
   const [language, setLanguage] = useState('en');
   const [currency, setCurrency] = useState('usd');
+
+  // Initialize theme from localStorage or default to dark
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      setLightMode(true);
+      document.documentElement.classList.add('light');
+    } else {
+      setLightMode(false);
+      document.documentElement.classList.remove('light');
+    }
+  }, []);
+
+  const handleThemeChange = (checked: boolean) => {
+    setLightMode(checked);
+    if (checked) {
+      document.documentElement.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.remove('light');
+      localStorage.setItem('theme', 'dark');
+    }
+  };
+
   const handleSave = () => {
     toast({
       title: 'Preferences Saved',
       description: 'Your settings have been updated successfully.'
     });
   };
-  return <DashboardLayout>
+
+  return (
+    <DashboardLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Preferences</h1>
@@ -118,7 +143,7 @@ const Preferences = () => {
                   <Label>Light Mode</Label>
                   <p className="text-sm text-muted-foreground">Switch to light theme</p>
                 </div>
-                <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+                <Switch checked={lightMode} onCheckedChange={handleThemeChange} />
               </div>
             </CardContent>
           </Card>
@@ -178,6 +203,8 @@ const Preferences = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>;
+    </DashboardLayout>
+  );
 };
+
 export default Preferences;

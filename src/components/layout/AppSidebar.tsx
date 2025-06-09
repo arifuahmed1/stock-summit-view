@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -75,7 +76,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-summit-light-gray/30">
       <SidebarHeader className="p-6">
-        <div className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer">
           <div className="w-8 h-8 bg-gradient-to-br from-summit-blue to-summit-purple rounded-lg flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
@@ -83,7 +84,7 @@ export function AppSidebar() {
             <h1 className="text-xl font-bold text-white">Stock Summit</h1>
             <p className="text-xs text-gray-400">AI-Powered Trading</p>
           </div>
-        </div>
+        </Link>
       </SidebarHeader>
       
       <SidebarContent>

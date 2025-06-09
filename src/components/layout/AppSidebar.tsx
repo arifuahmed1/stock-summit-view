@@ -30,6 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 const menuItems = [
   {
@@ -83,6 +84,14 @@ export function AppSidebar() {
             <h1 className="text-xl font-bold text-white">Stock Summit</h1>
             <p className="text-xs text-gray-400">AI-Powered Trading</p>
           </div>
+        </div>
+        <div className="mt-4">
+          <Button asChild variant="outline" className="w-full">
+            <Link to="/" className="flex items-center justify-center gap-2">
+              <Home className="w-4 h-4" />
+              Dashboard
+            </Link>
+          </Button>
         </div>
       </SidebarHeader>
       

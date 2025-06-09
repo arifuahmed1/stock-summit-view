@@ -4,6 +4,11 @@ import { Bell, Search, Menu } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export const TopBar: React.FC = () => {
   return (
@@ -35,10 +40,22 @@ export const TopBar: React.FC = () => {
           </div>
         </div>
         
-        <Button variant="ghost" size="icon" className="hover:bg-summit-blue/10 relative">
-          <Bell className="w-5 h-5" />
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-summit-red rounded-full"></div>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="hover:bg-summit-blue/10 relative">
+              <Bell className="w-5 h-5" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-summit-red rounded-full"></div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-80 mr-4 bg-background border-border">
+            <div className="p-4">
+              <h3 className="text-lg font-semibold mb-4">Notifications</h3>
+              <div className="text-center text-gray-500 py-8">
+                No new notifications
+              </div>
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

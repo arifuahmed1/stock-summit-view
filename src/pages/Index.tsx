@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { MarketOverview } from '@/components/dashboard/MarketOverview';
@@ -68,8 +67,8 @@ const ChartWithData: React.FC<{ symbol: string; title: string; color: string; is
   color,
   isCrypto = false 
 }) => {
-  const { data: stockCandles } = useStockCandles(symbol, '5', undefined, undefined);
-  const { data: cryptoCandles } = useCryptoCandles(symbol, '5', undefined, undefined);
+  const { data: stockCandles } = useStockCandles(symbol, '5');
+  const { data: cryptoCandles } = useCryptoCandles(symbol, '5');
   
   const candles = isCrypto ? cryptoCandles : stockCandles;
   

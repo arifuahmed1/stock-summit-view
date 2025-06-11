@@ -5,36 +5,88 @@ import { MarketOverview } from '@/components/dashboard/MarketOverview';
 import { StockCard } from '@/components/dashboard/StockCard';
 import { PriceChart } from '@/components/dashboard/PriceChart';
 import { PredictivePanel } from '@/components/dashboard/PredictivePanel';
+import { useStockQuote, useStockCandles, useCryptoCandles } from '@/hooks/useFinnhubData';
+import { Card } from '@/components/ui/card';
 
-// Mock data for demonstration
-const generateChartData = (basePrice: number, points: number = 24) => {
-  const data = [];
-  let price = basePrice;
+const stockSymbols = ['AAPL', 'GOOGL', 'TSLA', 'MSFT'];
+const cryptoSymbols = ['BINANCE:BTCUSDT', 'BINANCE:ETHUSDT', 'BINANCE:ADAUSDT', 'BINANCE:SOLUSDT'];
+
+const StockCardWithData: React.FC<{ symbol: string }> = ({ symbol }) => {
+  const { data: quote, isLoading } = useStockQuote(symbol);
   
-  for (let i = 0; i < points; i++) {
-    const change = (Math.random() - 0.5) * 10;
-    price += change;
-    data.push({
-      time: `${9 + Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`,
-      price: Math.max(price, basePrice * 0.8)
-    });
+  if (isLoading || !quote) {
+    return (
+      <Card className="glass-effect p-6 animate-pulse">
+        <div className="h-20 bg-gray-700 rounded"></div>
+      </Card>
+    );
   }
-  return data;
+
+  return (
+    <StockCard
+      symbol={symbol}
+      name={symbol}
+      price={quote.c}
+      change={quote.d}
+      changePercent={quote.dp}
+      volume="N/A"
+    />
+  );
 };
 
-const stockData = [
-  { symbol: 'AAPL', name: 'Apple Inc.', price: 174.32, change: 2.15, changePercent: 1.25, volume: '45.2M' },
-  { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 2847.63, change: -15.23, changePercent: -0.53, volume: '28.7M' },
-  { symbol: 'TSLA', name: 'Tesla Inc.', price: 198.78, change: 8.45, changePercent: 4.44, volume: '89.1M' },
-  { symbol: 'MSFT', name: 'Microsoft Corp.', price: 378.91, change: 4.12, changePercent: 1.10, volume: '32.5M' },
-];
+const CryptoCardWithData: React.FC<{ symbol: string; displaySymbol: string }> = ({ symbol, displaySymbol }) => {
+  const { data: candles, isLoading } = useCryptoCandles(symbol, '1');
+  
+  if (isLoading || !candles || !candles.c || candles.c.length === 0) {
+    return (
+      <Card className="glass-effect p-6 animate-pulse">
+        <div className="h-20 bg-gray-700 rounded"></div>
+      </Card>
+    );
+  }
 
-const cryptoData = [
-  { symbol: 'BTC', name: 'Bitcoin', price: 43567.89, change: 1234.56, changePercent: 2.91, volume: '$45.2B' },
-  { symbol: 'ETH', name: 'Ethereum', price: 2634.21, change: -87.34, changePercent: -3.21, volume: '$18.7B' },
-  { symbol: 'ADA', name: 'Cardano', price: 0.485, change: 0.023, changePercent: 4.98, volume: '$2.1B' },
-  { symbol: 'SOL', name: 'Solana', price: 98.45, change: 3.21, changePercent: 3.37, volume: '$3.8B' },
-];
+  const currentPrice = candles.c[candles.c.length - 1];
+  const previousPrice = candles.c[candles.c.length - 2] || currentPrice;
+  const change = currentPrice - previousPrice;
+  const changePercent = (change / previousPrice) * 100;
+
+  return (
+    <StockCard
+      symbol={displaySymbol}
+      name={displaySymbol}
+      price={currentPrice}
+      change={change}
+      changePercent={changePercent}
+      volume="N/A"
+    />
+  );
+};
+
+const ChartWithData: React.FC<{ symbol: string; title: string; color: string; isCrypto?: boolean }> = ({ 
+  symbol, 
+  title, 
+  color,
+  isCrypto = false 
+}) => {
+  const { data: stockCandles } = useStockCandles(symbol, '5', undefined, undefined);
+  const { data: cryptoCandles } = useCryptoCandles(symbol, '5', undefined, undefined);
+  
+  const candles = isCrypto ? cryptoCandles : stockCandles;
+  
+  if (!candles || !candles.c || candles.c.length === 0) {
+    return <PriceChart title={title} data={[]} color={color} />;
+  }
+
+  const chartData = candles.c.map((price, index) => ({
+    time: new Date(candles.t[index] * 1000).toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    }),
+    price
+  })).slice(-24); // Show last 24 data points
+
+  return <PriceChart title={title} data={chartData} color={color} />;
+};
 
 const predictions = [
   {
@@ -72,11 +124,11 @@ const Index = () => {
       <div className="animate-fade-in space-y-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Welcome to Stock Summit
           </h1>
-          <p className="text-gray-400">
-            Your AI-powered financial dashboard for smart trading decisions
+          <p className="text-muted-foreground">
+            Your AI-powered financial dashboard for smart trading decisions with real-time data from Finnhub
           </p>
         </div>
 
@@ -85,15 +137,16 @@ const Index = () => {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <PriceChart 
+          <ChartWithData 
+            symbol="SPY" 
             title="S&P 500 Today" 
-            data={generateChartData(4127.83)} 
             color="#00d4ff"
           />
-          <PriceChart 
+          <ChartWithData 
+            symbol="BINANCE:BTCUSDT" 
             title="Bitcoin 24H" 
-            data={generateChartData(43567.89, 24)} 
             color="#f7931a"
+            isCrypto={true}
           />
         </div>
 
@@ -102,21 +155,22 @@ const Index = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Top Stocks */}
             <div>
-              <h2 className="text-2xl font-bold text-white mb-4">Top Stocks</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-4">Top Stocks (Real-time)</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {stockData.map((stock, index) => (
-                  <StockCard key={index} {...stock} />
+                {stockSymbols.map((symbol) => (
+                  <StockCardWithData key={symbol} symbol={symbol} />
                 ))}
               </div>
             </div>
 
             {/* Crypto Section */}
             <div>
-              <h2 className="text-2xl font-bold text-white mb-4">Cryptocurrency</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-4">Cryptocurrency (Real-time)</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {cryptoData.map((crypto, index) => (
-                  <StockCard key={index} {...crypto} />
-                ))}
+                <CryptoCardWithData symbol="BINANCE:BTCUSDT" displaySymbol="BTC" />
+                <CryptoCardWithData symbol="BINANCE:ETHUSDT" displaySymbol="ETH" />
+                <CryptoCardWithData symbol="BINANCE:ADAUSDT" displaySymbol="ADA" />
+                <CryptoCardWithData symbol="BINANCE:SOLUSDT" displaySymbol="SOL" />
               </div>
             </div>
           </div>

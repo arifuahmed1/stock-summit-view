@@ -25,6 +25,7 @@ export const useCryptoCandles = (symbol: string, resolution: string = 'D') => {
     queryFn: () => finnhubService.getCryptoCandles(symbol, resolution),
     refetchInterval: 30000, // Refetch every 30 seconds
     enabled: !!symbol,
+    retry: 1, // Limit retries since we're using mock data
   });
 };
 

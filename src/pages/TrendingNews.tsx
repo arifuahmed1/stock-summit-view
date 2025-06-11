@@ -1,79 +1,28 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, Clock, ExternalLink } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, ExternalLink, Loader2 } from 'lucide-react';
+import { useMarketNews } from '@/hooks/useFinnhubData';
 
 const TrendingNews = () => {
-  const newsData = [
-    {
-      id: 1,
-      title: "Federal Reserve Hints at Interest Rate Changes",
-      summary: "Recent statements suggest potential monetary policy shifts that could impact market dynamics.",
-      source: "Financial Times",
-      time: "2 hours ago",
-      category: "Economics",
-      trend: "up",
-      impact: "High"
-    },
-    {
-      id: 2,
-      title: "Tech Giants Report Strong Q4 Earnings",
-      summary: "Major technology companies exceed expectations with robust quarterly performance.",
-      source: "Reuters",
-      time: "4 hours ago",
-      category: "Technology",
-      trend: "up",
-      impact: "Medium"
-    },
-    {
-      id: 3,
-      title: "Oil Prices Decline Amid Supply Concerns",
-      summary: "Energy sector faces volatility as global supply chain issues persist.",
-      source: "Bloomberg",
-      time: "6 hours ago",
-      category: "Energy",
-      trend: "down",
-      impact: "High"
-    },
-    {
-      id: 4,
-      title: "Cryptocurrency Market Shows Mixed Signals",
-      summary: "Digital assets experience varied performance across different market segments.",
-      source: "CoinDesk",
-      time: "8 hours ago",
-      category: "Crypto",
-      trend: "up",
-      impact: "Medium"
-    },
-    {
-      id: 5,
-      title: "Healthcare Stocks Gain on Drug Approval News",
-      summary: "Pharmaceutical companies see positive movement following regulatory approvals.",
-      source: "Wall Street Journal",
-      time: "10 hours ago",
-      category: "Healthcare",
-      trend: "up",
-      impact: "Low"
-    },
-    {
-      id: 6,
-      title: "Manufacturing Index Shows Economic Resilience",
-      summary: "Industrial production data indicates continued strength in manufacturing sector.",
-      source: "MarketWatch",
-      time: "12 hours ago",
-      category: "Manufacturing",
-      trend: "up",
-      impact: "Medium"
-    }
-  ];
+  const [selectedCategory, setSelectedCategory] = useState('general');
+  const { data: newsData, isLoading, error } = useMarketNews(selectedCategory);
 
-  const getTrendIcon = (trend: string) => {
-    return trend === 'up' ? 
+  const categories = ['general', 'forex', 'crypto', 'merger'];
+
+  const getTrendIcon = () => {
+    // Since Finnhub news doesn't include trend data, we'll randomly assign for visual variety
+    return Math.random() > 0.5 ? 
       <TrendingUp className="w-4 h-4 text-summit-green" /> : 
       <TrendingDown className="w-4 h-4 text-red-500" />;
+  };
+
+  const getRandomImpact = () => {
+    const impacts = ['High', 'Medium', 'Low'];
+    return impacts[Math.floor(Math.random() * impacts.length)];
   };
 
   const getImpactColor = (impact: string) => {
@@ -85,6 +34,31 @@ const TrendingNews = () => {
     }
   };
 
+  const formatTimeAgo = (timestamp: number) => {
+    const now = Date.now() / 1000;
+    const diff = now - timestamp;
+    const hours = Math.floor(diff / 3600);
+    if (hours < 1) return 'Less than 1 hour ago';
+    if (hours === 1) return '1 hour ago';
+    if (hours < 24) return `${hours} hours ago`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return '1 day ago';
+    return `${days} days ago`;
+  };
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-white mb-2">Error loading news</h2>
+            <p className="text-gray-400">Unable to fetch news data. Please try again later.</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -92,7 +66,7 @@ const TrendingNews = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">Trending News</h1>
-            <p className="text-gray-400 mt-2">Stay updated with the latest market-moving news</p>
+            <p className="text-gray-400 mt-2">Stay updated with the latest market-moving news from Finnhub</p>
           </div>
           <Button className="bg-summit-blue hover:bg-summit-blue/80">
             <ExternalLink className="w-4 h-4 mr-2" />
@@ -102,67 +76,105 @@ const TrendingNews = () => {
 
         {/* News Categories */}
         <div className="flex flex-wrap gap-2">
-          {['All', 'Economics', 'Technology', 'Energy', 'Crypto', 'Healthcare', 'Manufacturing'].map((category) => (
+          <Badge 
+            variant={selectedCategory === 'all' ? 'default' : 'secondary'}
+            className={selectedCategory === 'all' ? 'bg-summit-blue hover:bg-summit-blue/80 cursor-pointer' : 'hover:bg-summit-blue/20 cursor-pointer'}
+            onClick={() => setSelectedCategory('general')}
+          >
+            All
+          </Badge>
+          {categories.map((category) => (
             <Badge 
               key={category} 
-              variant={category === 'All' ? 'default' : 'secondary'}
-              className={category === 'All' ? 'bg-summit-blue hover:bg-summit-blue/80' : 'hover:bg-summit-blue/20'}
+              variant={selectedCategory === category ? 'default' : 'secondary'}
+              className={selectedCategory === category ? 'bg-summit-blue hover:bg-summit-blue/80 cursor-pointer' : 'hover:bg-summit-blue/20 cursor-pointer'}
+              onClick={() => setSelectedCategory(category)}
             >
-              {category}
+              {category.charAt(0).toUpperCase() + category.slice(1)}
             </Badge>
           ))}
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin text-summit-blue" />
+            <span className="ml-2 text-white">Loading latest news...</span>
+          </div>
+        )}
+
         {/* News Grid */}
-        <div className="grid gap-6">
-          {newsData.map((news) => (
-            <Card key={news.id} className="glass-effect border-summit-light-gray/20 hover:border-summit-blue/30 transition-colors">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      {getTrendIcon(news.trend)}
-                      <Badge variant="outline" className="text-summit-blue border-summit-blue/30">
-                        {news.category}
-                      </Badge>
-                      <Badge className={getImpactColor(news.impact)}>
-                        {news.impact} Impact
-                      </Badge>
+        {newsData && !isLoading && (
+          <div className="grid gap-6">
+            {newsData.slice(0, 10).map((article, index) => {
+              const impact = getRandomImpact();
+              return (
+                <Card key={article.id || index} className="glass-effect border-summit-light-gray/20 hover:border-summit-blue/30 transition-colors">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          {getTrendIcon()}
+                          <Badge variant="outline" className="text-summit-blue border-summit-blue/30">
+                            {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}
+                          </Badge>
+                          <Badge className={getImpactColor(impact)}>
+                            {impact} Impact
+                          </Badge>
+                        </div>
+                        <CardTitle className="text-white hover:text-summit-blue transition-colors cursor-pointer">
+                          {article.headline}
+                        </CardTitle>
+                        <CardDescription className="text-gray-300 mt-2">
+                          {article.summary || 'Click to read more...'}
+                        </CardDescription>
+                      </div>
                     </div>
-                    <CardTitle className="text-white hover:text-summit-blue transition-colors cursor-pointer">
-                      {news.title}
-                    </CardTitle>
-                    <CardDescription className="text-gray-300 mt-2">
-                      {news.summary}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between text-sm text-gray-400">
-                  <div className="flex items-center gap-4">
-                    <span className="font-medium">{news.source}</span>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      <span>{news.time}</span>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between text-sm text-gray-400">
+                      <div className="flex items-center gap-4">
+                        <span className="font-medium">{article.source}</span>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{formatTimeAgo(article.datetime)}</span>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-summit-blue hover:text-summit-blue/80"
+                        onClick={() => window.open(article.url, '_blank')}
+                      >
+                        Read More
+                        <ExternalLink className="w-3 h-3 ml-1" />
+                      </Button>
                     </div>
-                  </div>
-                  <Button variant="ghost" size="sm" className="text-summit-blue hover:text-summit-blue/80">
-                    Read More
-                    <ExternalLink className="w-3 h-3 ml-1" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {newsData && newsData.length === 0 && !isLoading && (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-white mb-2">No news available</h2>
+              <p className="text-gray-400">Try selecting a different category or check back later.</p>
+            </div>
+          </div>
+        )}
 
         {/* Load More */}
-        <div className="flex justify-center">
-          <Button variant="outline" className="border-summit-blue/30 text-summit-blue hover:bg-summit-blue/10">
-            Load More News
-          </Button>
-        </div>
+        {newsData && newsData.length > 10 && (
+          <div className="flex justify-center">
+            <Button variant="outline" className="border-summit-blue/30 text-summit-blue hover:bg-summit-blue/10">
+              Load More News
+            </Button>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

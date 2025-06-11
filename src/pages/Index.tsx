@@ -5,6 +5,7 @@ import { StockCard } from '@/components/dashboard/StockCard';
 import { PriceChart } from '@/components/dashboard/PriceChart';
 import { PredictivePanel } from '@/components/dashboard/PredictivePanel';
 import { useStockQuote, useStockCandles, useCryptoCandles } from '@/hooks/useFinnhubData';
+import { useBitcoinPrice } from '@/hooks/useCoindeskData';
 import { Card } from '@/components/ui/card';
 
 const stockSymbols = ['AAPL', 'GOOGL', 'TSLA', 'MSFT'];
@@ -35,8 +36,12 @@ const StockCardWithData: React.FC<{ symbol: string }> = ({ symbol }) => {
 
 const CryptoCardWithData: React.FC<{ symbol: string; displaySymbol: string }> = ({ symbol, displaySymbol }) => {
   const { data: candles, isLoading } = useCryptoCandles(symbol, '1');
+  const { data: btcPrice } = useBitcoinPrice();
   
-  if (isLoading || !candles || !candles.c || candles.c.length === 0) {
+  // Use Bitcoin price from Coindesk API for BTC
+  const isBitcoin = displaySymbol === 'BTC';
+  
+  if (isLoading || (!candles && !btcPrice)) {
     return (
       <Card className="glass-effect p-6 animate-pulse">
         <div className="h-20 bg-gray-700 rounded"></div>
@@ -44,10 +49,25 @@ const CryptoCardWithData: React.FC<{ symbol: string; displaySymbol: string }> = 
     );
   }
 
-  const currentPrice = candles.c[candles.c.length - 1];
-  const previousPrice = candles.c[candles.c.length - 2] || currentPrice;
-  const change = currentPrice - previousPrice;
-  const changePercent = (change / previousPrice) * 100;
+  let currentPrice, previousPrice, change, changePercent;
+  
+  if (isBitcoin && btcPrice) {
+    currentPrice = btcPrice;
+    previousPrice = candles && candles.c && candles.c.length > 0 ? candles.c[0] : currentPrice * 0.99; // Fallback to slight change
+    change = currentPrice - previousPrice;
+    changePercent = (change / previousPrice) * 100;
+  } else if (candles && candles.c && candles.c.length > 0) {
+    currentPrice = candles.c[candles.c.length - 1];
+    previousPrice = candles.c[candles.c.length - 2] || currentPrice;
+    change = currentPrice - previousPrice;
+    changePercent = (change / previousPrice) * 100;
+  } else {
+    // Fallback values
+    currentPrice = 0;
+    previousPrice = 0;
+    change = 0;
+    changePercent = 0;
+  }
 
   return (
     <StockCard
@@ -57,6 +77,7 @@ const CryptoCardWithData: React.FC<{ symbol: string; displaySymbol: string }> = 
       change={change}
       changePercent={changePercent}
       volume="N/A"
+      source={isBitcoin ? "Coindesk" : "Finnhub"}
     />
   );
 };

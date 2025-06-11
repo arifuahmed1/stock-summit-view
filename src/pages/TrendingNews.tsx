@@ -4,20 +4,28 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, Clock, ExternalLink, Loader2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TrendingUp, TrendingDown, Clock, ExternalLink, Loader2, Bitcoin, Newspaper } from 'lucide-react';
 import { useMarketNews } from '@/hooks/useFinnhubData';
+import { useCryptoNews } from '@/hooks/useCoindeskData';
+import { coindeskService } from '@/services/coindeskService';
 
 const TrendingNews = () => {
   const [selectedCategory, setSelectedCategory] = useState('general');
-  const { data: newsData, isLoading, error } = useMarketNews(selectedCategory);
-
+  const [selectedSource, setSelectedSource] = useState('finnhub');
+  
+  const { data: finnhubNews, isLoading: isLoadingFinnhub, error: finnhubError } = useMarketNews(selectedCategory);
+  const { data: coindeskRawNews, isLoading: isLoadingCoindesk, error: coindeskError } = useCryptoNews(20);
+  
+  const coindeskNews = coindeskRawNews ? coindeskService.convertNewsToAppFormat(coindeskRawNews) : [];
+  
   const categories = ['general', 'forex', 'crypto', 'merger'];
 
   const getTrendIcon = () => {
-    // Since Finnhub news doesn't include trend data, we'll randomly assign for visual variety
+    // Since news doesn't include trend data, we'll randomly assign for visual variety
     return Math.random() > 0.5 ? 
       <TrendingUp className="w-4 h-4 text-summit-green" /> : 
-      <TrendingDown className="w-4 h-4 text-red-500" />;
+      <TrendingDown className="w-4 h-4 text-summit-red" />;
   };
 
   const getRandomImpact = () => {
@@ -46,6 +54,10 @@ const TrendingNews = () => {
     return `${days} days ago`;
   };
 
+  const isLoading = selectedSource === 'finnhub' ? isLoadingFinnhub : isLoadingCoindesk;
+  const error = selectedSource === 'finnhub' ? finnhubError : coindeskError;
+  const newsData = selectedSource === 'finnhub' ? finnhubNews : coindeskNews;
+
   if (error) {
     return (
       <DashboardLayout>
@@ -66,7 +78,7 @@ const TrendingNews = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">Trending News</h1>
-            <p className="text-gray-400 mt-2">Stay updated with the latest market-moving news from Finnhub</p>
+            <p className="text-gray-400 mt-2">Stay updated with the latest market-moving news</p>
           </div>
           <Button className="bg-summit-blue hover:bg-summit-blue/80">
             <ExternalLink className="w-4 h-4 mr-2" />
@@ -74,26 +86,42 @@ const TrendingNews = () => {
           </Button>
         </div>
 
-        {/* News Categories */}
-        <div className="flex flex-wrap gap-2">
-          <Badge 
-            variant={selectedCategory === 'all' ? 'default' : 'secondary'}
-            className={selectedCategory === 'all' ? 'bg-summit-blue hover:bg-summit-blue/80 cursor-pointer' : 'hover:bg-summit-blue/20 cursor-pointer'}
-            onClick={() => setSelectedCategory('general')}
-          >
-            All
-          </Badge>
-          {categories.map((category) => (
+        {/* News Sources Tabs */}
+        <Tabs defaultValue="finnhub" onValueChange={setSelectedSource}>
+          <TabsList className="bg-background border border-border">
+            <TabsTrigger value="finnhub" className="data-[state=active]:bg-summit-blue data-[state=active]:text-white">
+              <Newspaper className="w-4 h-4 mr-2" />
+              Finnhub
+            </TabsTrigger>
+            <TabsTrigger value="coindesk" className="data-[state=active]:bg-summit-blue data-[state=active]:text-white">
+              <Bitcoin className="w-4 h-4 mr-2" />
+              Coindesk
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* News Categories (only show for Finnhub) */}
+        {selectedSource === 'finnhub' && (
+          <div className="flex flex-wrap gap-2">
             <Badge 
-              key={category} 
-              variant={selectedCategory === category ? 'default' : 'secondary'}
-              className={selectedCategory === category ? 'bg-summit-blue hover:bg-summit-blue/80 cursor-pointer' : 'hover:bg-summit-blue/20 cursor-pointer'}
-              onClick={() => setSelectedCategory(category)}
+              variant={selectedCategory === 'all' ? 'default' : 'secondary'}
+              className={selectedCategory === 'all' ? 'bg-summit-blue hover:bg-summit-blue/80 cursor-pointer' : 'hover:bg-summit-blue/20 cursor-pointer'}
+              onClick={() => setSelectedCategory('general')}
             >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
+              All
             </Badge>
-          ))}
-        </div>
+            {categories.map((category) => (
+              <Badge 
+                key={category} 
+                variant={selectedCategory === category ? 'default' : 'secondary'}
+                className={selectedCategory === category ? 'bg-summit-blue hover:bg-summit-blue/80 cursor-pointer' : 'hover:bg-summit-blue/20 cursor-pointer'}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </Badge>
+            ))}
+          </div>
+        )}
 
         {/* Loading State */}
         {isLoading && (
@@ -116,10 +144,16 @@ const TrendingNews = () => {
                         <div className="flex items-center gap-2 mb-2">
                           {getTrendIcon()}
                           <Badge variant="outline" className="text-summit-blue border-summit-blue/30">
-                            {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}
+                            {selectedSource === 'finnhub' 
+                              ? (selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1))
+                              : 'Crypto'
+                            }
                           </Badge>
                           <Badge className={getImpactColor(impact)}>
                             {impact} Impact
+                          </Badge>
+                          <Badge variant="secondary">
+                            {article.source}
                           </Badge>
                         </div>
                         <CardTitle className="text-white hover:text-summit-blue transition-colors cursor-pointer">
@@ -134,7 +168,6 @@ const TrendingNews = () => {
                   <CardContent>
                     <div className="flex items-center justify-between text-sm text-gray-400">
                       <div className="flex items-center gap-4">
-                        <span className="font-medium">{article.source}</span>
                         <div className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           <span>{formatTimeAgo(article.datetime)}</span>
@@ -162,7 +195,7 @@ const TrendingNews = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <h2 className="text-xl font-semibold text-white mb-2">No news available</h2>
-              <p className="text-gray-400">Try selecting a different category or check back later.</p>
+              <p className="text-gray-400">Try selecting a different category or source, or check back later.</p>
             </div>
           </div>
         )}

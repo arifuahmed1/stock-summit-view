@@ -1,7 +1,7 @@
 
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 
 interface StockCardProps {
   symbol: string;
@@ -10,51 +10,69 @@ interface StockCardProps {
   change: number;
   changePercent: number;
   volume?: string;
+  source?: string;
 }
 
-export const StockCard: React.FC<StockCardProps> = ({
-  symbol,
-  name,
-  price,
-  change,
+export const StockCard: React.FC<StockCardProps> = ({ 
+  symbol, 
+  name, 
+  price, 
+  change, 
   changePercent,
-  volume
+  volume,
+  source = 'Finnhub'
 }) => {
+  const priceFormatted = price.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  const changeFormatted = change.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    signDisplay: 'exceptZero'
+  });
+  
+  const changePercentFormatted = changePercent.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    signDisplay: 'exceptZero'
+  });
+
   const isPositive = change >= 0;
-  const trendColor = isPositive ? 'text-summit-green' : 'text-summit-red';
-  const bgColor = isPositive ? 'bg-summit-green/10' : 'bg-summit-red/10';
-  const TrendIcon = isPositive ? TrendingUp : TrendingDown;
 
   return (
-    <Card className="glass-effect hover-glow p-6 transition-all duration-300 cursor-pointer">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-lg font-bold text-white">{symbol}</h3>
-          <p className="text-sm text-gray-400">{name}</p>
-        </div>
-        <div className={`p-2 rounded-lg ${bgColor}`}>
-          <TrendIcon className={`w-4 h-4 ${trendColor}`} />
-        </div>
-      </div>
-      
-      <div className="space-y-2">
-        <div className="text-2xl font-bold text-white">
-          ${price.toFixed(2)}
-        </div>
-        <div className={`flex items-center space-x-2 ${trendColor}`}>
-          <span className="font-medium">
-            {isPositive ? '+' : ''}${change.toFixed(2)}
-          </span>
-          <span className="text-sm">
-            ({isPositive ? '+' : ''}{changePercent.toFixed(2)}%)
-          </span>
-        </div>
-        {volume && (
-          <div className="text-xs text-gray-400">
-            Vol: {volume}
+    <Card className="glass-effect border-summit-light-gray/20 hover:border-summit-blue/30 transition-colors">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-summit-blue to-summit-purple rounded-full flex items-center justify-center mr-2">
+                <span className="text-xs font-bold text-white">{symbol.slice(0, 2)}</span>
+              </div>
+              <div>
+                <div className="font-semibold text-foreground">{symbol}</div>
+                <div className="text-xs text-muted-foreground">{name}</div>
+              </div>
+            </div>
+            {source && source !== 'Finnhub' && (
+              <div className="text-xs text-muted-foreground mt-1">Source: {source}</div>
+            )}
           </div>
-        )}
-      </div>
+          <div className="text-right">
+            <div className="text-xl font-bold text-foreground">${priceFormatted}</div>
+            <div className={`flex items-center justify-end mt-1 ${isPositive ? 'text-summit-green' : 'text-summit-red'}`}>
+              {isPositive ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+              <span>{changeFormatted} ({changePercentFormatted}%)</span>
+            </div>
+            {volume && (
+              <div className="text-xs text-muted-foreground">
+                Vol: {volume}
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
     </Card>
   );
 };

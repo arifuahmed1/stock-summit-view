@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Bitcoin } from 'lucide-react';
 import { useStockQuote, useCryptoCandles } from '@/hooks/useFinnhubData';
+import { useBitcoinPrice } from '@/hooks/useCoindeskData';
 
 const stockSymbols = ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN', 'NVDA'];
 const cryptoData = [
@@ -71,8 +71,15 @@ const CryptoItem: React.FC<{ symbol: string; name: string; displaySymbol: string
   displaySymbol 
 }) => {
   const { data: candles, isLoading } = useCryptoCandles(symbol, '1');
-
-  if (isLoading || !candles || !candles.c || candles.c.length === 0) {
+  const { data: btcPrice } = useBitcoinPrice();
+  
+  // Use Bitcoin price from Coindesk API for BTC
+  const isBitcoin = displaySymbol === 'BTC';
+  const currentPrice = isBitcoin && btcPrice ? btcPrice : 
+    (candles && candles.c && candles.c.length > 0 ? candles.c[candles.c.length - 1] : null);
+  const previousPrice = candles && candles.c && candles.c.length > 1 ? candles.c[candles.c.length - 2] : currentPrice;
+  
+  if (isLoading || currentPrice === null) {
     return (
       <div className="flex items-center justify-between p-3 rounded-lg animate-pulse">
         <div className="flex items-center space-x-3">
@@ -90,9 +97,7 @@ const CryptoItem: React.FC<{ symbol: string; name: string; displaySymbol: string
     );
   }
 
-  const currentPrice = candles.c[candles.c.length - 1];
-  const previousPrice = candles.c[candles.c.length - 2] || currentPrice;
-  const changePercent = ((currentPrice - previousPrice) / previousPrice) * 100;
+  const changePercent = previousPrice ? ((currentPrice - previousPrice) / previousPrice) * 100 : 0;
 
   return (
     <div className="flex items-center justify-between p-3 rounded-lg hover:bg-summit-blue/5 transition-colors">
@@ -114,7 +119,7 @@ const CryptoItem: React.FC<{ symbol: string; name: string; displaySymbol: string
             <span className="text-xs">{changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%</span>
           </div>
           <Badge variant="outline" className="text-xs">
-            Live
+            {isBitcoin ? "Coindesk" : "Live"}
           </Badge>
         </div>
       </div>
